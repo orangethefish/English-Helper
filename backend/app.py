@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
 from PIL import Image
+import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
@@ -10,9 +10,8 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Configure Gemini API
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-model = genai.GenerativeModel('gemini-pro-vision')
+# Configure Gemini API with key from environment variable
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 def process_image(image):
     try:
@@ -34,10 +33,13 @@ def process_image(image):
         }
         """
 
-        # Generate response from Gemini
-        response = model.generate_content([prompt, img])
+        # Generate response using the new client approach
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        response = model.generate_content(
+            contents=[img, prompt]
+        )
         
-        # Parse and return the response
+        # Return the response
         return jsonify(response.text)
 
     except Exception as e:
