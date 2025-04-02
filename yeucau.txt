@@ -1,0 +1,76 @@
+#### Technical Requirements for the "English Helper" App
+
+Here are the technical requirements for the "English Helper" app based on your idea. The requirements are divided into **Frontend**, **Backend**, **Third-Party API**, **Data Processing**, and **Deployment & Security** categories to ensure clarity.
+
+---
+
+### **1. Frontend Requirements**
+
+The frontend will provide an intuitive and user-friendly interface for users to interact with the app.
+
+#### **Core Features**
+- **Image Upload/Camera Capture**
+  - Users can upload an image from their device or take a photo directly within the app.
+  - Support common image formats like `.jpg`, `.png`, etc.
+  - Allow cropping or focusing on specific parts of the image for better text recognition.
+
+- **Results Display**
+  - Display the following results to users in a well-organized manner:
+    1. **Answers and explanations** for the questions (translated into Vietnamese).
+    2. **Vietnamese translation** of the passage.
+    3. **List of new words** (A1-A2 CEFR level) with meanings and Vietnamese translations.
+  - Provide a clean, visually appealing UI for easy readability.
+
+- **Error Handling**
+  - Notify users if the image does not contain any readable text or if there is a processing error.
+
+#### **Technology Stack**
+- Frontend Framework: **Next.js** (web) .
+- Backend Framework: Flask .
+- Database: Not required yet.
+- UI Library: **Material-UI**, **TailwindCSS**, or **Bootstrap**;
+
+---
+
+### **2. Backend Requirements**
+
+The backend will handle the image processing, integration with the Gemini API, and formatting of the response.
+
+#### **Core Features**
+- **API Endpoint for Image Submission**
+  - Create an endpoint to receive images from the frontend.
+  - Validate image format and size before processing.
+
+- **Integration with Gemini API**
+  - Pass the image to the Gemini API for Optical Character Recognition (OCR) and natural language processing (NLP).
+  - Engineer the prompt for Gemini API to:
+    1. Extract text from the image.
+    2. Provide answers and explanations in Vietnamese.
+    3. Translate the passage into Vietnamese.
+    4. Identify new words at the A1-A2 CEFR level and provide definitions with Vietnamese translations.
+
+- **Prompt Engineering**
+  - Design a structured prompt for Gemini API to ensure the response can be parsed into:
+    ```json
+    {
+      "answers": [
+        {
+          "question": "Question text",
+          "answer": "Answer text",
+          "explanation": "Explanation in Vietnamese"
+        }
+      ],
+      "vietnamese_translation": "Translation of the passage in Vietnamese",
+      "new_words": [
+        {
+          "word": "Achievement",
+          "part_of_speech": "n",
+          "meaning": "thành tựu"
+        }
+      ]
+    }
+    ```
+
+- **Response Parsing**
+  - Parse the JSON response from Gemini into a structured object.
+  - Handle errors from the Gemini API gracefully and return meaningful error messages to the frontend.
