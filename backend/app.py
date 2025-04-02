@@ -4,6 +4,8 @@ from PIL import Image
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+import json
+import re
 
 load_dotenv()
 
@@ -13,6 +15,38 @@ CORS(app)
 # Configure Gemini API with key from environment variable
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
+def clean_json_string(json_str):
+    """
+    Args:
+        json_str (str): The JSON string to clean and parse
+        
+    Returns:
+        dict: Parsed JSON object
+        
+    Raises:
+        json.JSONDecodeError: If JSON parsing fails
+    """
+    try:
+        # Remove any potential whitespace at the beginning and end
+        cleaned_str = json_str.strip()
+        
+        # Replace escaped newlines with actual newlines
+        cleaned_str = cleaned_str.replace('\\n', '\n')
+        
+        # Replace escaped quotes with actual quotes
+        cleaned_str = cleaned_str.replace('\\"', '"')
+
+        cleaned_str = cleaned_str.replace('```json', "").replace('```', "")
+        
+        # Parse the cleaned string into a Python dictionary
+        parsed_json = json.loads(cleaned_str)
+        
+        return parsed_json
+        
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        raise
+
 def process_image(image):
     try:
         # Convert the image to PIL Image
@@ -21,26 +55,23 @@ def process_image(image):
         # Prepare the prompt for Gemini
         prompt = """
         Please analyze this image containing English text and provide:
-        1. Extract and answer any questions in Vietnamese
-        2. Translate the entire passage to Vietnamese
-        3. Identify words at A1-A2 CEFR level and provide their Vietnamese meanings
+        1. Extract and answer any questions in Vietnamese. Fill in the blank with the answer to get a complete passage.
+        2. Translate the entire passage to Vietnamese as a whole. The question is not required to be included.
+        3. Identify words at A2 or above CEFR level and provide their Vietnamese meanings including those in the passage and those in the options. Don't include easy vocabularies.
         
         Format the response as JSON with the following structure:
         {
-            "answers": [{"question": "...", "answer": "...", "explanation": "..."}],
+            "complete_passage": "...",
             "vietnamese_translation": "...",
             "new_words": [{"word": "...", "part_of_speech": "...", "meaning": "..."}]
         }
         """
 
-        # Generate response using the new client approach
+        # Generate response using the model
         model = genai.GenerativeModel('gemini-2.0-flash')
-        response = model.generate_content(
-            contents=[img, prompt]
-        )
+        response = model.generate_content([img, prompt])
         
-        # Return the response
-        return jsonify(response.text)
+        return response.text.replace('```json', "").replace('```', "")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

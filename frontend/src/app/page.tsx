@@ -82,15 +82,7 @@ export default function Home() {
               {/* Answers Section */}
               <section>
                 <Typography variant="h6">Answers</Typography>
-                {result.answers?.map((answer: any, index: number) => (
-                  <Box key={index} className="mt-2">
-                    <Typography variant="subtitle1">Q: {answer.question}</Typography>
-                    <Typography>A: {answer.answer}</Typography>
-                    <Typography className="text-gray-600">
-                      Explanation: {answer.explanation}
-                    </Typography>
-                  </Box>
-                ))}
+                <Typography>{result.complete_passage}</Typography>
               </section>
 
               {/* Translation Section */}
