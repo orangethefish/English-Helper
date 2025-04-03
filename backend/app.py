@@ -55,8 +55,8 @@ def process_image(image):
         # Prepare the prompt for Gemini
         prompt = """
         Please analyze this image containing English text and provide:
-        1. Extract the cloze test or reading comprehension exercise and answer any questions in Vietnamese. Fill in the blank with the answer to get a complete passage if it's a cloze test exercise.
-        2. Translate the entire passage to Vietnamese as a whole. The question is not required to be translated if it's a cloze test exercise.
+        1. Extract the cloze test or reading comprehension exercise and answer any questions in Vietnamese. If it's a cloze test, return the passage as a whole. If it's a reading comprehension, don't return anything"
+        2. Translate the entire passage to Vietnamese for both cloze test and reading comprehension. If it's a reading comprehension, include the translation of the question alongside with the passage"
         3. Identify words at A2 or above CEFR level and provide their Vietnamese meanings including those in the passage and those in the options. Don't include easy vocabularies.
         
         Format the response as JSON with the following structure:
