@@ -1,0 +1,12 @@
+[Unit]
+Description=English Helper Backend Service
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/english-helper/backend
+Environment="PATH=/var/www/english-helper/backend/venv/bin"
+ExecStart=/var/www/english-helper/backend/venv/bin/gunicorn --workers 3 --bind unix:english-helper.sock -m 007 app:app
+
+[Install]
+WantedBy=multi-user.target 
