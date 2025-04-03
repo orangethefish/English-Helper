@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { Button, Container, Paper, Typography, Box, CircularProgress } from '@mui/material';
 import axios from 'axios';
 
+// Get API URL based on environment
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? process.env.NEXT_PUBLIC_API_URL 
+  : 'http://localhost:5000';
+
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +35,7 @@ export default function Home() {
     formData.append('image', image);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/process-image', formData, {
+      const response = await axios.post(`${API_URL}/api/process-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
