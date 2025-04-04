@@ -9,16 +9,83 @@ const API_URL = process.env.NODE_ENV === 'production'
   ? process.env.NEXT_PUBLIC_API_URL 
   : 'http://localhost:5000';
 
+// Add these constants at the top of the file
+const MAX_WIDTH = 1600; // Maximum width for the scaled image
+const MAX_HEIGHT = 1600; // Maximum height for the scaled image
+const QUALITY = 0.8; // JPEG quality (0.8 is a good balance between size and quality)
+
+// Add this function after the imports
+const scaleImage = (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions while maintaining aspect ratio
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Convert canvas to blob
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Canvas to Blob conversion failed'));
+              return;
+            }
+            // Create a new file from the blob
+            const scaledFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(scaledFile);
+          },
+          'image/jpeg',
+          QUALITY
+        );
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setImage(event.target.files[0]);
-      setError(null);
+      try {
+        const originalFile = event.target.files[0];
+        const scaledImage = await scaleImage(originalFile);
+        setImage(scaledImage);
+        setError(null);
+      } catch (err) {
+        setError('Error processing image');
+        console.error(err);
+      }
     }
   };
 
